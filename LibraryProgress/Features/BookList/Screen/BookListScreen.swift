@@ -114,4 +114,12 @@ class BookListScreen: UIView {
     func reloadTableView() {
         tableView.reloadData()
     }
+    
+    func setEmptyStateVisible(visible: Bool) {
+        emptyStateLabel.isHidden = !visible
+    }
+    
+    func indexPath(for cell: UITableViewCell) -> IndexPath? {
+        tableView.indexPath(for: cell)
+    }
 }

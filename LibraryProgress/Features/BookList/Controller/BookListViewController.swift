@@ -10,6 +10,16 @@ import UIKit
 class BookListViewController: UIViewController {
     
     private var bookListScreen: BookListScreen?
+    private let bookListViewModel: BookListViewModel
+    
+    init() {
+        self.bookListViewModel = BookListViewModel()
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func loadView() {
         bookListScreen = BookListScreen()
@@ -31,6 +41,7 @@ class BookListViewController: UIViewController {
         bookListScreen?.setupSearchBarDelegate(self)
         bookListScreen?.delegate(delegate: self)
         bookListScreen?.setupTableView(dataSource: self, delegate: self)
+        bookListViewModel.delegate(delegate: self)
     }
     
     @objc
@@ -59,19 +70,29 @@ extension BookListViewController: UITableViewDelegate {
 // MARK: TableViewDataSource
 extension BookListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 10
+        return bookListViewModel.numberOfItems
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: BookTableViewCell.identifier, for: indexPath) as? BookTableViewCell else { return UITableViewCell() }
-        cell.configCell(viewModel: BookTableViewCellViewModel())
+        cell.configCell(viewModel: bookListViewModel.cellViewModel(index: indexPath.row))
         cell.delegate(delegate: self)
         return cell
     }
 }
 
+// MARK: BookTableViewCellDelegate
 extension BookListViewController: BookTableViewCellDelegate {
     func bookTableViewCellDidTapRemove(_ cell: BookTableViewCell) {
-        print("Remover célula")
+        guard let indexPath = bookListScreen?.indexPath(for: cell) else { return }
+        bookListViewModel.deleteBook(at: indexPath.row)
+    }
+}
+
+// MARK: BookListViewModelDelegate
+extension BookListViewController: BookListViewModelDelegate {
+    func didUpdateBooks() {
+        bookListScreen?.reloadTableView()
+        bookListScreen?.setEmptyStateVisible(visible: bookListViewModel.numberOfItems == 0)
     }
 }

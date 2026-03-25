@@ -63,11 +63,11 @@ class BookTableViewCell: UITableViewCell {
     }
     
     func configCell(viewModel: BookTableViewCellViewModel) {
-        bookTableViewCellScreen.titleLabel.text = "Código Limpo"
-        bookTableViewCellScreen.authorLabel.text = "Robert C. Martin"
-        bookTableViewCellScreen.statusLabel.text = "Vou Ler"
-        bookTableViewCellScreen.progressLabel.text = "0/347 páginas(0%)"
-        bookTableViewCellScreen.progressView.progress = 0.7
+        bookTableViewCellScreen.titleLabel.text = viewModel.titleText
+        bookTableViewCellScreen.authorLabel.text = viewModel.authorText
+        bookTableViewCellScreen.statusLabel.text = viewModel.statusText
+        bookTableViewCellScreen.progressLabel.text = viewModel.progressText
+        bookTableViewCellScreen.progressView.progress = viewModel.progressValue
     }
 }
 
