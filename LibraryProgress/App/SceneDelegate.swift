@@ -14,7 +14,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(windowScene: windowScene)
-        let bookListViewController = BookListViewController()
+        let service = InMemoryBookService()
+        let bookListViewController = BookListViewController(bookService: service)
         let nav = UINavigationController(rootViewController: bookListViewController)
         window?.rootViewController = nav
         window?.makeKeyAndVisible()
@@ -50,4 +51,3 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 
 }
-
