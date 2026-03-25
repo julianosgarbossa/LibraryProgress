@@ -13,6 +13,11 @@ protocol BookListViewModelDelegate: AnyObject {
 
 class BookListViewModel {
     private weak var delegate: BookListViewModelDelegate?
+    private let bookService: BookServiceProtocol
+
+    init(bookService: BookServiceProtocol) {
+        self.bookService = bookService
+    }
 
     func delegate(delegate: BookListViewModelDelegate) {
         self.delegate = delegate
@@ -37,57 +42,6 @@ class BookListViewModel {
             }
         }
     }
-
-    private var allBooks: [Book] = [Book(title: "Arquitetura Limpa",
-                                         author: "Robert C. Martin",
-                                         totalPages: 432,
-                                         currentPage: 0,
-                                         status: .toRead),
-                                    Book(title: "O Programador Pragmático",
-                                         author: "Andrew Hunt & David Thomas",
-                                         totalPages: 352,
-                                         currentPage: 52,
-                                         status: .reading),
-                                    Book(title: "Engenharia de Software Moderna",
-                                         author: "Marco Tulio Valente",
-                                         totalPages: 368,
-                                         currentPage: 0,
-                                         status: .toRead),
-                                    Book(title: "Código Limpo",
-                                         author: "Robert C. Martin",
-                                         totalPages: 464,
-                                         currentPage: 0,
-                                         status: .toRead),
-                                    Book(title: "Entendendo Algoritmos",
-                                         author: "Aditya Y. Bhargava",
-                                         totalPages: 264,
-                                         currentPage: 0,
-                                         status: .toRead),
-                                    Book(title: "Entendendo Estruturas de Dados",
-                                         author: "Marcello La Rocca",
-                                         totalPages: 300,
-                                         currentPage: 0,
-                                         status: .toRead),
-                                    Book(title: "Introdução à Linguagem SQL",
-                                         author: "Thomas Nield",
-                                         totalPages: 300,
-                                         currentPage: 150,
-                                         status: .reading),
-                                    Book(title: "O Codificador Limpo",
-                                         author: "Robert C. Martin",
-                                         totalPages: 256,
-                                         currentPage: 0,
-                                         status: .toRead),
-                                    Book(title: "Implementando Domain-Driven Design",
-                                         author: "Vaughn Vernon",
-                                         totalPages: 656,
-                                         currentPage: 0,
-                                         status: .toRead),
-                                    Book(title: "Padrões de Projeto",
-                                         author: "Erich Gamma, Richard Helm, Ralph Johnson & John Vlissides",
-                                         totalPages: 395,
-                                         currentPage: 395,
-                                         status: .finished)]
 
     private(set) var books: [Book] = []
     private(set) var selectedFilter: Filter = .all
@@ -119,7 +73,7 @@ class BookListViewModel {
     }
 
     func loadBooks() {
-        books = apply(filter: selectedFilter, books: allBooks)
+        books = apply(filter: selectedFilter, books: bookService.fetchBooks())
         delegate?.didUpdateBooks()
     }
 
@@ -134,7 +88,7 @@ class BookListViewModel {
     func deleteBook(at index: Int) {
         guard books.indices.contains(index) else { return }
         let bookId = books[index].id
-        allBooks.removeAll { $0.id == bookId }
+        bookService.deleteBook(bookId: bookId)
         loadBooks()
     }
 

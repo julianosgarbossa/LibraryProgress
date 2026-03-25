@@ -12,8 +12,8 @@ class BookListViewController: UIViewController {
     private var bookListScreen: BookListScreen?
     private let bookListViewModel: BookListViewModel
     
-    init() {
-        self.bookListViewModel = BookListViewModel()
+    init(bookService: BookServiceProtocol) {
+        self.bookListViewModel = BookListViewModel(bookService: bookService)
         super.init(nibName: nil, bundle: nil)
     }
     
