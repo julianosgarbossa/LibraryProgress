@@ -7,7 +7,17 @@
 
 import UIKit
 
+protocol BookListScreenDelegate: AnyObject {
+    func didChangeFilter(index: Int)
+}
+
 class BookListScreen: UIView {
+    
+    private weak var delegate: BookListScreenDelegate?
+
+    func delegate(delegate: BookListScreenDelegate) {
+        self.delegate = delegate
+    }
     
     private lazy var searchBar: UISearchBar = {
         let searchBar = UISearchBar()
@@ -30,7 +40,7 @@ class BookListScreen: UIView {
         tableView.translatesAutoresizingMaskIntoConstraints = false
         tableView.separatorStyle = .none
         tableView.backgroundColor = .systemGroupedBackground
-        // TODO Register
+        tableView.register(BookTableViewCell.self, forCellReuseIdentifier: BookTableViewCell.identifier)
         return tableView
     }()
     
@@ -47,7 +57,7 @@ class BookListScreen: UIView {
     
     @objc
     private func didChangeFilter(_ sender: UISegmentedControl) {
-        print("Filtro alterado...")
+        delegate?.didChangeFilter(index: sender.selectedSegmentIndex)
     }
     
     override init(frame: CGRect) {
@@ -90,6 +100,10 @@ class BookListScreen: UIView {
             emptyStateLabel.leadingAnchor.constraint(greaterThanOrEqualTo: leadingAnchor, constant: 24),
             emptyStateLabel.trailingAnchor.constraint(lessThanOrEqualTo: trailingAnchor, constant: -24)
         ])
+    }
+    
+    func setupSearchBarDelegate(_ delegate: UISearchBarDelegate) {
+        searchBar.delegate = delegate
     }
     
     func setupTableView(dataSource: UITableViewDataSource, delegate: UITableViewDelegate) {
