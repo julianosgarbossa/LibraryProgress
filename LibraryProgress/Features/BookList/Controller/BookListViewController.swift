@@ -58,7 +58,9 @@ class BookListViewController: UIViewController {
 
 // MARK: SearchBarDelegate
 extension BookListViewController: UISearchBarDelegate {
-    
+    func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
+        bookListViewModel.setSearchText(text: searchText)
+    }
 }
 
 // MARK: BookListScreenDelegate

@@ -90,8 +90,9 @@ class BookListViewModel {
                                          status: .finished)]
 
     private(set) var books: [Book] = []
-    private var selectedFilter: Filter = .all
-
+    private(set) var selectedFilter: Filter = .all
+    private(set) var searchText: String = ""
+    
     private func apply(filter: Filter, books: [Book]) -> [Book] {
         let filteredByStatus: [Book]
 
@@ -106,7 +107,11 @@ class BookListViewModel {
             filteredByStatus = books.filter { $0.status == .finished }
         }
 
-        return filteredByStatus
+        guard !searchText.isEmpty else { return filteredByStatus }
+
+        return filteredByStatus.filter { book in
+            book.title.localizedCaseInsensitiveContains(searchText)
+        }
     }
 
     var numberOfItems: Int {
@@ -136,6 +141,11 @@ class BookListViewModel {
     func setFilter(index: Int) {
         guard let filter = Filter(rawValue: index) else { return }
         selectedFilter = filter
+        loadBooks()
+    }
+
+    func setSearchText(text: String) {
+        searchText = text.trimmingCharacters(in: .whitespacesAndNewlines)
         loadBooks()
     }
 }
