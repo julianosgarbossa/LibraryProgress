@@ -65,6 +65,9 @@ class BookTableViewCellScreen: UIView {
         button.titleLabel?.font = .preferredFont(forTextStyle: .caption1)
         button.tintColor = .systemRed
         button.addTarget(self, action: #selector(didTapRemoveButton), for: .touchUpInside)
+        button.backgroundColor = .systemGroupedBackground
+        button.layer.cornerRadius = 4
+        button.clipsToBounds = true
         return button
     }()
 

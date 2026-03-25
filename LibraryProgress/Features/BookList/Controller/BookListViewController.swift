@@ -30,6 +30,12 @@ class BookListViewController: UIViewController {
         super.viewDidLoad()
         configureNavigation()
         configureDelegates()
+        bookListViewModel.loadBooks()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        bookListViewModel.loadBooks()
     }
     
     private func configureNavigation() {
@@ -58,7 +64,7 @@ extension BookListViewController: UISearchBarDelegate {
 // MARK: BookListScreenDelegate
 extension BookListViewController: BookListScreenDelegate {
     func didChangeFilter(index: Int) {
-        print("Filtro alterado - index: \(index)")
+        bookListViewModel.setFilter(index: index)
     }
 }
 
