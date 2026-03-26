@@ -10,5 +10,6 @@ import Foundation
 protocol BookServiceProtocol: AnyObject {
     func fetchBooks() -> [Book]
     func addBook(_ book: Book)
+    func updateProgress(bookId: UUID, currentPage: Int)
     func deleteBook(bookId: UUID)
 }

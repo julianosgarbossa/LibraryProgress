@@ -70,6 +70,6 @@ struct Book {
     mutating func setCurrentPage(page: Int) {
         let normalizedPage = min(max(0, page), totalPages)
         currentPage = normalizedPage
-        status = Self.resolveStatus(requestedStatus: status, currentPage: normalizedPage, totalPages: totalPages)
+        status = Self.resolveStatus(requestedStatus: .toRead, currentPage: normalizedPage, totalPages: totalPages)
     }
 }

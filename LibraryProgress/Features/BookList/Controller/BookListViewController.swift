@@ -77,7 +77,13 @@ extension BookListViewController: BookListScreenDelegate {
 
 // MARK: TableViewDelegate
 extension BookListViewController: UITableViewDelegate {
-    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let selectedBook = bookListViewModel.book(index: indexPath.row)
+        let detailViewModel = BookDetailViewModel(bookId: selectedBook.id, bookService: bookService)
+        let detailController = BookDetailViewController(viewModel: detailViewModel)
+        navigationController?.pushViewController(detailController, animated: true)
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
 }
 
 // MARK: TableViewDataSource
