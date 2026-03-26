@@ -1,4 +1,4 @@
-# LibraryProgress
+# Library
 
 Aplicativo iOS para gerenciamento de leitura de livros, com foco em organização por status e acompanhamento de progresso.
 
