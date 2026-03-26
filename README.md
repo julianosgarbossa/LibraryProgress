@@ -2,6 +2,10 @@
 
 Aplicativo iOS para gerenciamento de leitura de livros, com foco em organização por status e acompanhamento de progresso.
 
+# Apresentação
+
+Link: https://www.youtube.com/watch?v=MnhuXsgIrmY
+
 ## Screenshots
 <p align="center">
   <img src="Assets/01 - Home_AllBooks.png" width="150"/>
