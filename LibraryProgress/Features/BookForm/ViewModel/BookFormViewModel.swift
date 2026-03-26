@@ -8,6 +8,11 @@
 import Foundation
 
 final class BookFormViewModel {
+    enum Mode {
+        case create
+        case edit(Book)
+    }
+
     enum SaveError: LocalizedError, Equatable {
         case emptyTitle
         case emptyAuthor
@@ -28,23 +33,42 @@ final class BookFormViewModel {
         }
     }
 
-    private let bookService: BookServiceProtocol
+    struct FormData {
+        let title: String
+        let author: String
+        let totalPages: String
+        let currentPage: String
+        let statusIndex: Int
+    }
 
-    init(bookService: BookServiceProtocol) {
+    private let bookService: BookServiceProtocol
+    let mode: Mode
+
+    init(bookService: BookServiceProtocol, mode: Mode) {
         self.bookService = bookService
+        self.mode = mode
     }
 
     var screenTitle: String {
-        "Novo Livro"
+        switch mode {
+        case .create:
+            return "Novo Livro"
+        case .edit:
+            return "Editar Livro"
+        }
     }
 
-    func save(
-        title: String?,
-        author: String?,
-        totalPagesText: String?,
-        currentPageText: String?,
-        statusIndex: Int
-    ) -> Result<Void, SaveError> {
+    func initialData() -> FormData? {
+        guard case .edit(let book) = mode else { return nil }
+
+        return FormData(title: book.title,
+                        author: book.author,
+                        totalPages: String(book.totalPages),
+                        currentPage: String(book.currentPage),
+                        statusIndex: statusIndex(from: book.status))
+    }
+
+    func save(title: String?, author: String?, totalPagesText: String?, currentPageText: String?, statusIndex: Int) -> Result<Void, SaveError> {
         let normalizedTitle = title?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         let normalizedAuthor = author?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
@@ -60,15 +84,25 @@ final class BookFormViewModel {
             return .failure(.invalidCurrentPage)
         }
 
-        let book = Book(
-            title: normalizedTitle,
-            author: normalizedAuthor,
-            totalPages: totalPages,
-            currentPage: currentPage,
-            status: status(from: statusIndex)
-        )
-
-        bookService.addBook(book)
+        switch mode {
+        case .create:
+            let newBook = Book(title: normalizedTitle,
+                               author: normalizedAuthor,
+                               totalPages: totalPages,
+                               currentPage: currentPage,
+                               status: status(from: statusIndex))
+            
+            bookService.addBook(newBook)
+        case .edit(let existingBook):
+            let updatedBook = Book(id: existingBook.id,
+                                   title: normalizedTitle,
+                                   author: normalizedAuthor,
+                                   totalPages: totalPages,
+                                   currentPage: currentPage,
+                                   status: status(from: statusIndex))
+            
+            bookService.updateBook(updatedBook)
+        }
         return .success(())
     }
 
@@ -80,6 +114,17 @@ final class BookFormViewModel {
             return .finished
         default:
             return .toRead
+        }
+    }
+
+    private func statusIndex(from status: BookStatus) -> Int {
+        switch status {
+        case .toRead:
+            return 0
+        case .reading:
+            return 1
+        case .finished:
+            return 2
         }
     }
 }

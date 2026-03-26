@@ -22,6 +22,20 @@ final class InMemoryBookService: BookServiceProtocol {
         books.append(book)
     }
 
+    func updateBook(_ book: Book) {
+        guard let index = books.firstIndex(where: { $0.id == book.id }) else {
+            books.append(book)
+            return
+        }
+
+        books[index] = book
+    }
+
+    func updateProgress(bookId: UUID, currentPage: Int) {
+        guard let index = books.firstIndex(where: { $0.id == bookId }) else { return }
+        books[index].setCurrentPage(page: currentPage)
+    }
+
     func deleteBook(bookId: UUID) {
         books.removeAll { $0.id == bookId }
     }
