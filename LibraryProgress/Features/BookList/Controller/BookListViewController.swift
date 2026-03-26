@@ -7,9 +7,9 @@
 
 import UIKit
 
-class BookListViewController: UIViewController {
+final class BookListViewController: UIViewController {
     
-    private var bookListScreen: BookListScreen?
+    private let bookListScreen = BookListScreen()
     private let bookService: BookServiceProtocol
     private let bookListViewModel: BookListViewModel
     
@@ -24,7 +24,6 @@ class BookListViewController: UIViewController {
     }
     
     override func loadView() {
-        bookListScreen = BookListScreen()
         view = bookListScreen
     }
     
@@ -46,10 +45,10 @@ class BookListViewController: UIViewController {
     }
     
     private func configureDelegates() {
-        bookListScreen?.setupSearchBarDelegate(self)
-        bookListScreen?.delegate(delegate: self)
-        bookListScreen?.setupTableView(dataSource: self, delegate: self)
-        bookListViewModel.delegate(delegate: self)
+        bookListScreen.setupSearchBarDelegate(self)
+        bookListScreen.setDelegate(self)
+        bookListScreen.setupTableView(dataSource: self, delegate: self)
+        bookListViewModel.setDelegate(self)
     }
     
     @objc
@@ -64,24 +63,24 @@ class BookListViewController: UIViewController {
 // MARK: SearchBarDelegate
 extension BookListViewController: UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
-        bookListViewModel.setSearchText(text: searchText)
+        bookListViewModel.setSearchText(searchText)
     }
 }
 
 // MARK: BookListScreenDelegate
 extension BookListViewController: BookListScreenDelegate {
     func didChangeFilter(index: Int) {
-        bookListViewModel.setFilter(index: index)
+        bookListViewModel.setFilter(at: index)
     }
 }
 
 // MARK: TableViewDelegate
 extension BookListViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        let selectedBook = bookListViewModel.book(index: indexPath.row)
+        let selectedBook = bookListViewModel.book(at: indexPath.row)
         let detailViewModel = BookDetailViewModel(bookId: selectedBook.id, bookService: bookService)
         let detailController = BookDetailViewController(viewModel: detailViewModel)
-        detailController.delegate(delegate: self)
+        detailController.delegate = self
         navigationController?.pushViewController(detailController, animated: true)
         tableView.deselectRow(at: indexPath, animated: true)
     }
@@ -90,12 +89,12 @@ extension BookListViewController: UITableViewDelegate {
 // MARK: TableViewDataSource
 extension BookListViewController: UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return bookListViewModel.numberOfItems
+        return bookListViewModel.numberOfItems()
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: BookTableViewCell.identifier, for: indexPath) as? BookTableViewCell else { return UITableViewCell() }
-        cell.configCell(viewModel: bookListViewModel.cellViewModel(index: indexPath.row))
+        cell.configCell(viewModel: bookListViewModel.cellViewModel(at: indexPath.row))
         cell.delegate(delegate: self)
         return cell
     }
@@ -104,7 +103,7 @@ extension BookListViewController: UITableViewDataSource {
 // MARK: BookTableViewCellDelegate
 extension BookListViewController: BookTableViewCellDelegate {
     func bookTableViewCellDidTapRemove(_ cell: BookTableViewCell) {
-        guard let indexPath = bookListScreen?.indexPath(for: cell) else { return }
+        guard let indexPath = bookListScreen.indexPath(for: cell) else { return }
         bookListViewModel.deleteBook(at: indexPath.row)
     }
 }
@@ -112,21 +111,24 @@ extension BookListViewController: BookTableViewCellDelegate {
 // MARK: BookListViewModelDelegate
 extension BookListViewController: BookListViewModelDelegate {
     func didUpdateBooks() {
-        bookListScreen?.reloadTableView()
-        bookListScreen?.setEmptyStateVisible(visible: bookListViewModel.numberOfItems == 0)
+        bookListScreen.reloadTableView()
+        bookListScreen.setEmptyState(
+            isVisible: bookListViewModel.numberOfItems() == 0,
+            message: bookListViewModel.emptyStateMessage
+        )
     }
 }
 
 // MARK: BookFormViewControllerDelegate
 extension BookListViewController: BookFormViewControllerDelegate {
-    func bookFormViewControllerDidSave(controller: BookFormViewController) {
+    func bookFormViewControllerDidSave(_ controller: BookFormViewController) {
         bookListViewModel.loadBooks()
     }
 }
 
 // MARK: BookDetailViewControllerDelegate
 extension BookListViewController: BookDetailViewControllerDelegate {
-    func bookDetailViewControllerDidTapEdit(controller: BookDetailViewController, book: Book) {
+    func bookDetailViewControllerDidTapEdit(_ controller: BookDetailViewController, book: Book) {
         let formViewModel = BookFormViewModel(bookService: bookService, mode: .edit(book))
         let formController = BookFormViewController(viewModel: formViewModel)
         formController.delegate = self

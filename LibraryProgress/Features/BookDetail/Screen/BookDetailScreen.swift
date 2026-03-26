@@ -13,10 +13,10 @@ protocol BookDetailScreenDelegate: AnyObject {
     func didTapSaveProgressButton()
 }
 
-class BookDetailScreen: UIView {
+final class BookDetailScreen: UIView {
     private weak var delegate: BookDetailScreenDelegate?
 
-    func delegate(delegate: BookDetailScreenDelegate) {
+    func setDelegate(_ delegate: BookDetailScreenDelegate) {
         self.delegate = delegate
     }
 

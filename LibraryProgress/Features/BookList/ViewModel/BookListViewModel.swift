@@ -11,7 +11,7 @@ protocol BookListViewModelDelegate: AnyObject {
     func didUpdateBooks()
 }
 
-class BookListViewModel {
+final class BookListViewModel {
     private weak var delegate: BookListViewModelDelegate?
     private let bookService: BookServiceProtocol
 
@@ -19,7 +19,7 @@ class BookListViewModel {
         self.bookService = bookService
     }
 
-    func delegate(delegate: BookListViewModelDelegate) {
+    func setDelegate(_ delegate: BookListViewModelDelegate) {
         self.delegate = delegate
     }
 
@@ -47,7 +47,10 @@ class BookListViewModel {
     private(set) var selectedFilter: Filter = .all
     private(set) var searchText: String = ""
     
-    private func apply(filter: Filter, books: [Book]) -> [Book] {
+    // Aplica o filtro em duas etapas:
+    // 1) status do livro
+    // 2) texto de busca no título
+    private func apply(filter: Filter, to books: [Book]) -> [Book] {
         let filteredByStatus: [Book]
 
         switch filter {
@@ -62,26 +65,49 @@ class BookListViewModel {
         }
 
         guard !searchText.isEmpty else { return filteredByStatus }
+        let normalizedSearch = normalized(searchText)
 
         return filteredByStatus.filter { book in
-            book.title.localizedCaseInsensitiveContains(searchText)
+            
+            // Busca tolerante a acento e diferença de caixa (maiúsculo/minúsculo).
+            normalized(book.title).contains(normalizedSearch)
         }
     }
 
-    var numberOfItems: Int {
+    // Mensagem exibida apenas quando a lista está vazia.
+    // Prioriza contexto de busca; sem busca, mostra contexto do filtro.
+    var emptyStateMessage: String {
+        if books.isEmpty == false {
+            return ""
+        }
+
+        if searchText.isEmpty == false {
+            return "Nenhum livro encontrado para \"\(searchText)\"."
+        }
+
+        switch selectedFilter {
+        case .all:
+            return "Nenhum livro cadastrado."
+        case .toRead, .reading, .finished:
+            return "Nenhum livro no filtro \"\(selectedFilter.title)\"."
+        }
+    }
+
+    func numberOfItems() -> Int {
         books.count
     }
 
     func loadBooks() {
-        books = apply(filter: selectedFilter, books: bookService.fetchBooks())
+        // Fonte única da lista vem do service; filtro e busca são aplicados localmente.
+        books = apply(filter: selectedFilter, to: bookService.fetchBooks())
         delegate?.didUpdateBooks()
     }
 
-    func book(index: Int) -> Book {
+    func book(at index: Int) -> Book {
         books[index]
     }
 
-    func cellViewModel(index: Int) -> BookTableViewCellViewModel {
+    func cellViewModel(at index: Int) -> BookTableViewCellViewModel {
         BookTableViewCellViewModel(book: books[index])
     }
 
@@ -89,17 +115,22 @@ class BookListViewModel {
         guard books.indices.contains(index) else { return }
         let bookId = books[index].id
         bookService.deleteBook(bookId: bookId)
+        // Recarrega para refletir remoção + estado atual de filtro/busca.
         loadBooks()
     }
 
-    func setFilter(index: Int) {
+    func setFilter(at index: Int) {
         guard let filter = Filter(rawValue: index) else { return }
         selectedFilter = filter
         loadBooks()
     }
 
-    func setSearchText(text: String) {
+    func setSearchText(_ text: String) {
         searchText = text.trimmingCharacters(in: .whitespacesAndNewlines)
         loadBooks()
+    }
+
+    private func normalized(_ text: String) -> String {
+        text.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
     }
 }

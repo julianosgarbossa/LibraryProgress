@@ -58,6 +58,7 @@ final class BookFormViewModel {
         }
     }
 
+    // Retorna os dados iniciais só no modo edição para preencher o formulário.
     func initialData() -> FormData? {
         guard case .edit(let book) = mode else { return nil }
 
@@ -69,17 +70,31 @@ final class BookFormViewModel {
     }
 
     func save(title: String?, author: String?, totalPagesText: String?, currentPageText: String?, statusIndex: Int) -> Result<Void, SaveError> {
+        // Normaliza entradas para evitar falhas por espaços extras.
         let normalizedTitle = title?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
         let normalizedAuthor = author?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let normalizedTotalPagesText = totalPagesText?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        let normalizedCurrentPageText = currentPageText?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
 
+        // Regras mínimas de consistência do formulário.
         guard !normalizedTitle.isEmpty else { return .failure(.emptyTitle) }
         guard !normalizedAuthor.isEmpty else { return .failure(.emptyAuthor) }
 
-        guard let totalPages = Int(totalPagesText ?? ""), totalPages > 0 else {
+        guard let totalPages = Int(normalizedTotalPagesText), totalPages > 0 else {
             return .failure(.invalidTotalPages)
         }
 
-        let currentPage = Int(currentPageText ?? "") ?? 0
+        let currentPage: Int
+        if normalizedCurrentPageText.isEmpty {
+            // Campo opcional: vazio significa início da leitura.
+            currentPage = 0
+        } else {
+            guard let parsedCurrentPage = Int(normalizedCurrentPageText) else {
+                return .failure(.invalidCurrentPage)
+            }
+            currentPage = parsedCurrentPage
+        }
+
         guard currentPage >= 0, currentPage <= totalPages else {
             return .failure(.invalidCurrentPage)
         }
@@ -94,6 +109,7 @@ final class BookFormViewModel {
             
             bookService.addBook(newBook)
         case .edit(let existingBook):
+            // Mantém o mesmo id para atualizar o registro existente.
             let updatedBook = Book(id: existingBook.id,
                                    title: normalizedTitle,
                                    author: normalizedAuthor,
@@ -106,6 +122,7 @@ final class BookFormViewModel {
         return .success(())
     }
 
+    // Mapeia índice do segmented para status de domínio.
     private func status(from index: Int) -> BookStatus {
         switch index {
         case 1:
@@ -117,6 +134,7 @@ final class BookFormViewModel {
         }
     }
 
+    // Mapeia status de domínio para índice do segmented (prefill na edição).
     private func statusIndex(from status: BookStatus) -> Int {
         switch status {
         case .toRead:

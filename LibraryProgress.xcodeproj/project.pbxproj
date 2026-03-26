@@ -148,7 +148,7 @@
 				DEVELOPMENT_TEAM = 2YF7DP2JBR;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LibraryProgress/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Library;
+				INFOPLIST_KEY_CFBundleDisplayName = Biblioteca;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = "";
@@ -185,7 +185,7 @@
 				DEVELOPMENT_TEAM = 2YF7DP2JBR;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = LibraryProgress/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = Library;
+				INFOPLIST_KEY_CFBundleDisplayName = Biblioteca;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = "";
