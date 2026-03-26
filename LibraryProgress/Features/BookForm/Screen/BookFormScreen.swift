@@ -110,6 +110,14 @@ class BookFormScreen: UIView {
         fatalError("init(coder:) has not been implemented")
     }
 
+    func apply(formData: BookFormViewModel.FormData) {
+        titleTextField.text = formData.title
+        authorTextField.text = formData.author
+        totalPagesTextField.text = formData.totalPages
+        currentPageTextField.text = formData.currentPage
+        statusSegmentedControl.selectedSegmentIndex = formData.statusIndex
+    }
+
     private func addVisualElements() {
         backgroundColor = .systemBackground
 

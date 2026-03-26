@@ -35,6 +35,12 @@ class BookFormViewController: UIViewController {
         super.viewDidLoad()
         title = bookFormViewModel.screenTitle
         bookFormScreen?.delegate(delegate: self)
+        configureDataIfNeeded()
+    }
+
+    private func configureDataIfNeeded() {
+        guard let formData = bookFormViewModel.initialData() else { return }
+        bookFormScreen?.apply(formData: formData)
     }
 
     private func saveBook() {

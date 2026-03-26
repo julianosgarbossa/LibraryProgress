@@ -54,7 +54,7 @@ class BookListViewController: UIViewController {
     
     @objc
     private func didTapAdd(_ sender: UIBarButtonItem) {
-        let formViewModel = BookFormViewModel(bookService: bookService)
+        let formViewModel = BookFormViewModel(bookService: bookService, mode: .create)
         let formController = BookFormViewController(viewModel: formViewModel)
         formController.delegate = self
         navigationController?.pushViewController(formController, animated: true)
@@ -81,6 +81,7 @@ extension BookListViewController: UITableViewDelegate {
         let selectedBook = bookListViewModel.book(index: indexPath.row)
         let detailViewModel = BookDetailViewModel(bookId: selectedBook.id, bookService: bookService)
         let detailController = BookDetailViewController(viewModel: detailViewModel)
+        detailController.delegate(delegate: self)
         navigationController?.pushViewController(detailController, animated: true)
         tableView.deselectRow(at: indexPath, animated: true)
     }
@@ -120,5 +121,15 @@ extension BookListViewController: BookListViewModelDelegate {
 extension BookListViewController: BookFormViewControllerDelegate {
     func bookFormViewControllerDidSave(controller: BookFormViewController) {
         bookListViewModel.loadBooks()
+    }
+}
+
+// MARK: BookDetailViewControllerDelegate
+extension BookListViewController: BookDetailViewControllerDelegate {
+    func bookDetailViewControllerDidTapEdit(controller: BookDetailViewController, book: Book) {
+        let formViewModel = BookFormViewModel(bookService: bookService, mode: .edit(book))
+        let formController = BookFormViewController(viewModel: formViewModel)
+        formController.delegate = self
+        controller.navigationController?.pushViewController(formController, animated: true)
     }
 }

@@ -7,9 +7,18 @@
 
 import UIKit
 
+protocol BookDetailViewControllerDelegate: AnyObject {
+    func bookDetailViewControllerDidTapEdit(controller: BookDetailViewController, book: Book)
+}
+
 class BookDetailViewController: UIViewController {
     private var bookDetailScreen: BookDetailScreen?
     private let bookDetailViewModel: BookDetailViewModel
+    private weak var delegate: BookDetailViewControllerDelegate?
+    
+    func delegate(delegate: BookDetailViewControllerDelegate) {
+        self.delegate = delegate
+    }
 
     init(viewModel: BookDetailViewModel) {
         self.bookDetailViewModel = viewModel
@@ -39,6 +48,12 @@ class BookDetailViewController: UIViewController {
     
     private func configureNavigation() {
         title = "Detalhes"
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            title: "Editar",
+            style: .plain,
+            target: self,
+            action: #selector(didTapEdit)
+        )
     }
     
     private func configureDelegates() {
@@ -50,6 +65,12 @@ class BookDetailViewController: UIViewController {
         let alert = UIAlertController(title: "Atenção", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
+    }
+
+    @objc
+    private func didTapEdit() {
+        guard let currentBook = bookDetailViewModel.book else { return }
+        delegate?.bookDetailViewControllerDidTapEdit(controller: self, book: currentBook)
     }
 }
 
