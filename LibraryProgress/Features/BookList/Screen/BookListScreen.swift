@@ -11,11 +11,11 @@ protocol BookListScreenDelegate: AnyObject {
     func didChangeFilter(index: Int)
 }
 
-class BookListScreen: UIView {
+final class BookListScreen: UIView {
     
     private weak var delegate: BookListScreenDelegate?
 
-    func delegate(delegate: BookListScreenDelegate) {
+    func setDelegate(_ delegate: BookListScreenDelegate) {
         self.delegate = delegate
     }
     
@@ -115,8 +115,9 @@ class BookListScreen: UIView {
         tableView.reloadData()
     }
     
-    func setEmptyStateVisible(visible: Bool) {
-        emptyStateLabel.isHidden = !visible
+    func setEmptyState(isVisible: Bool, message: String) {
+        emptyStateLabel.text = message
+        emptyStateLabel.isHidden = !isVisible
     }
     
     func indexPath(for cell: UITableViewCell) -> IndexPath? {

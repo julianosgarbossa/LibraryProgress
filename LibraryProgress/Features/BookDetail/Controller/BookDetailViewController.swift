@@ -8,17 +8,13 @@
 import UIKit
 
 protocol BookDetailViewControllerDelegate: AnyObject {
-    func bookDetailViewControllerDidTapEdit(controller: BookDetailViewController, book: Book)
+    func bookDetailViewControllerDidTapEdit(_ controller: BookDetailViewController, book: Book)
 }
 
-class BookDetailViewController: UIViewController {
-    private var bookDetailScreen: BookDetailScreen?
+final class BookDetailViewController: UIViewController {
+    private let bookDetailScreen = BookDetailScreen()
     private let bookDetailViewModel: BookDetailViewModel
-    private weak var delegate: BookDetailViewControllerDelegate?
-    
-    func delegate(delegate: BookDetailViewControllerDelegate) {
-        self.delegate = delegate
-    }
+    weak var delegate: BookDetailViewControllerDelegate?
 
     init(viewModel: BookDetailViewModel) {
         self.bookDetailViewModel = viewModel
@@ -30,7 +26,6 @@ class BookDetailViewController: UIViewController {
     }
 
     override func loadView() {
-        bookDetailScreen = BookDetailScreen()
         view = bookDetailScreen
     }
 
@@ -57,8 +52,8 @@ class BookDetailViewController: UIViewController {
     }
     
     private func configureDelegates() {
-        bookDetailScreen?.delegate(delegate: self)
-        bookDetailViewModel.delegate(delegate: self)
+        bookDetailScreen.setDelegate(self)
+        bookDetailViewModel.setDelegate(self)
     }
 
     private func showAlert(message: String) {
@@ -70,7 +65,7 @@ class BookDetailViewController: UIViewController {
     @objc
     private func didTapEdit() {
         guard let currentBook = bookDetailViewModel.book else { return }
-        delegate?.bookDetailViewControllerDidTapEdit(controller: self, book: currentBook)
+        delegate?.bookDetailViewControllerDidTapEdit(self, book: currentBook)
     }
 }
 
@@ -85,7 +80,7 @@ extension BookDetailViewController: BookDetailScreenDelegate {
     }
 
     func didTapSaveProgressButton() {
-        let result = bookDetailViewModel.saveCurrentPage(text: bookDetailScreen?.currentPageText())
+        let result = bookDetailViewModel.saveCurrentPage(from: bookDetailScreen.currentPageText())
 
         if case let .failure(error) = result {
             showAlert(message: error.localizedDescription)
@@ -96,6 +91,6 @@ extension BookDetailViewController: BookDetailScreenDelegate {
 // MARK: BookDetailViewModelDelegate
 extension BookDetailViewController: BookDetailViewModelDelegate {
     func didUpdateBook(book: Book) {
-        bookDetailScreen?.display(book: book)
+        bookDetailScreen.display(book: book)
     }
 }

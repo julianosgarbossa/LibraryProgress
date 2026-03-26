@@ -11,10 +11,10 @@ protocol BookFormScreenDelegate: AnyObject {
     func didTapSaveButton()
 }
 
-class BookFormScreen: UIView {
+final class BookFormScreen: UIView {
     private weak var delegate: BookFormScreenDelegate?
 
-    func delegate(delegate: BookFormScreenDelegate) {
+    func setDelegate(_ delegate: BookFormScreenDelegate) {
         self.delegate = delegate
     }
 
@@ -96,13 +96,28 @@ class BookFormScreen: UIView {
         return stack
     }()
 
+    private lazy var keyboardToolbar: UIToolbar = {
+        let toolbar = UIToolbar()
+        toolbar.sizeToFit()
+        let flexibleSpace = UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: nil, action: nil)
+        let doneButton = UIBarButtonItem(barButtonSystemItem: .done, target: self, action: #selector(didTapDoneKeyboard))
+        toolbar.items = [flexibleSpace, doneButton]
+        return toolbar
+    }()
+
     @objc
     private func didTapSaveButton(_ sender: UIButton) {
         delegate?.didTapSaveButton()
     }
 
+    @objc
+    private func didTapDoneKeyboard() {
+        endEditing(true)
+    }
+
     override init(frame: CGRect) {
         super.init(frame: frame)
+        configureKeyboardAccessory()
         addVisualElements()
     }
 
@@ -165,11 +180,16 @@ class BookFormScreen: UIView {
         stackView.addArrangedSubview(inputView)
     }
     
-    func getFormData() -> BookFormScreenData {
-        BookFormScreenData(title: titleTextField.text,
-                           author: authorTextField.text,
-                           totalPagesText: totalPagesTextField.text,
-                           currentPageText: currentPageTextField.text,
-                           statusIndex: statusSegmentedControl.selectedSegmentIndex)
+    func getFormData() -> BookFormInputData {
+        BookFormInputData(title: titleTextField.text,
+                          author: authorTextField.text,
+                          totalPagesText: totalPagesTextField.text,
+                          currentPageText: currentPageTextField.text,
+                          statusIndex: statusSegmentedControl.selectedSegmentIndex)
+    }
+
+    private func configureKeyboardAccessory() {
+        totalPagesTextField.inputAccessoryView = keyboardToolbar
+        currentPageTextField.inputAccessoryView = keyboardToolbar
     }
 }

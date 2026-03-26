@@ -8,11 +8,11 @@
 import UIKit
 
 protocol BookFormViewControllerDelegate: AnyObject {
-    func bookFormViewControllerDidSave(controller: BookFormViewController)
+    func bookFormViewControllerDidSave(_ controller: BookFormViewController)
 }
 
-class BookFormViewController: UIViewController {
-    private var bookFormScreen: BookFormScreen?
+final class BookFormViewController: UIViewController {
+    private let bookFormScreen = BookFormScreen()
     private let bookFormViewModel: BookFormViewModel
 
     weak var delegate: BookFormViewControllerDelegate?
@@ -27,36 +27,36 @@ class BookFormViewController: UIViewController {
     }
 
     override func loadView() {
-        bookFormScreen = BookFormScreen()
         view = bookFormScreen
     }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         title = bookFormViewModel.screenTitle
-        bookFormScreen?.delegate(delegate: self)
+        bookFormScreen.setDelegate(self)
+        setupTapToDismissKeyboard()
         configureDataIfNeeded()
     }
 
     private func configureDataIfNeeded() {
         guard let formData = bookFormViewModel.initialData() else { return }
-        bookFormScreen?.apply(formData: formData)
+        bookFormScreen.apply(formData: formData)
     }
 
     private func saveBook() {
-        guard let formData = bookFormScreen?.getFormData() else { return }
+        view.endEditing(true)
+        let formData = bookFormScreen.getFormData()
         
-        let result = bookFormViewModel.save(
-            title: formData.title,
-            author: formData.author,
-            totalPagesText: formData.totalPagesText,
-            currentPageText: formData.currentPageText,
-            statusIndex: formData.statusIndex
+        let result = bookFormViewModel.save(title: formData.title,
+                                            author: formData.author,
+                                            totalPagesText: formData.totalPagesText,
+                                            currentPageText: formData.currentPageText,
+                                            statusIndex: formData.statusIndex
         )
 
         switch result {
         case .success:
-            delegate?.bookFormViewControllerDidSave(controller: self)
+            delegate?.bookFormViewControllerDidSave(self)
             navigationController?.popViewController(animated: true)
         case .failure(let error):
             showAlert(message: error.localizedDescription)
@@ -67,6 +67,17 @@ class BookFormViewController: UIViewController {
         let alert = UIAlertController(title: "Atenção", message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
         present(alert, animated: true)
+    }
+
+    private func setupTapToDismissKeyboard() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapToDismissKeyboard))
+        tapGesture.cancelsTouchesInView = false
+        view.addGestureRecognizer(tapGesture)
+    }
+
+    @objc
+    private func didTapToDismissKeyboard() {
+        view.endEditing(true)
     }
 }
 

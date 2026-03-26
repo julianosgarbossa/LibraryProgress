@@ -1,5 +1,5 @@
 //
-//  BookFormScreenData.swift
+//  BookFormInputData.swift
 //  LibraryProgress
 //
 //  Created by Juliano Sgarbossa on 25/03/26.
@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct BookFormScreenData {
+struct BookFormInputData {
     let title: String?
     let author: String?
     let totalPagesText: String?
