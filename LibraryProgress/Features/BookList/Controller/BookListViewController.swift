@@ -10,9 +10,11 @@ import UIKit
 class BookListViewController: UIViewController {
     
     private var bookListScreen: BookListScreen?
+    private let bookService: BookServiceProtocol
     private let bookListViewModel: BookListViewModel
     
     init(bookService: BookServiceProtocol) {
+        self.bookService = bookService
         self.bookListViewModel = BookListViewModel(bookService: bookService)
         super.init(nibName: nil, bundle: nil)
     }
@@ -52,7 +54,10 @@ class BookListViewController: UIViewController {
     
     @objc
     private func didTapAdd(_ sender: UIBarButtonItem) {
-        print("Navegar para tela de adicionar livro")
+        let formViewModel = BookFormViewModel(bookService: bookService)
+        let formController = BookFormViewController(viewModel: formViewModel)
+        formController.delegate = self
+        navigationController?.pushViewController(formController, animated: true)
     }
 }
 
@@ -102,5 +107,12 @@ extension BookListViewController: BookListViewModelDelegate {
     func didUpdateBooks() {
         bookListScreen?.reloadTableView()
         bookListScreen?.setEmptyStateVisible(visible: bookListViewModel.numberOfItems == 0)
+    }
+}
+
+// MARK: BookFormViewControllerDelegate
+extension BookListViewController: BookFormViewControllerDelegate {
+    func bookFormViewControllerDidSave(controller: BookFormViewController) {
+        bookListViewModel.loadBooks()
     }
 }

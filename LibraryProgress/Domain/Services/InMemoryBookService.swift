@@ -18,6 +18,10 @@ final class InMemoryBookService: BookServiceProtocol {
         books
     }
 
+    func addBook(_ book: Book) {
+        books.append(book)
+    }
+
     func deleteBook(bookId: UUID) {
         books.removeAll { $0.id == bookId }
     }
